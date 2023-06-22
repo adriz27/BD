@@ -1,0 +1,32 @@
+vista1 := project dni (programadores njoin analistas);
+
+todos := rename t(códigopr, dniemp, horas) (project código(proyectos) product project dni(programadores union analistas) product project 0 (distribución));
+vista2 := rename v2(dni, horas) (group_by dniemp dniemp,sum(horas) true (project dniemp, horas(distribución union todos)));
+
+r1 := project dni, nombre (analistas union programadores);
+r2 := project proyecto, dni (rename dis(proyecto, dni, horas)(distribución));
+vista3 := r1 nfjoin r2;
+
+vista4 := project dni, nombre(select teléfono is null (programadores union analistas));
+
+mediaEmp(dni, número) := group_by dniemp dniemp, sum(horas)/count(códigopr) true (distribución);
+mediaPr(cod, n) := group_by códigopr códigopr, sum(horas)/count(dniemp) true (distribución);
+v := rename p(dni, número, media)(mediaEmp product project avg(n) (mediaPr));
+vista5 := project dni, número(select número < media (v));
+
+--proyectos en los que trabaja o es jefe Evaristo
+prEv := (project código(select dnidir = dni AND nombre = 'Evaristo'(proyectos product r1))) union (rename pr(código)(project códigopr(select dniemp = dni AND nombre = 'Evaristo'(distribución product r1))));
+trabConEv:= project dniemp(select código = códigopr (distribución product prEv));
+h := select dni = dniemp (rename d(códigopr, dni, horas) (distribución) product (project dniemp (distribución) difference trabConEv));
+vista6:= rename v6(dni, códigopr, horas)(project dni, códigopr, horas*1.2(h));
+
+dniEv := project dni( select nombre = 'Evaristo' ( programadores union analistas));
+vista7(dni) := (rename d(código, dni)(project códigopr, dniemp(distribución)) division prEv) difference dniEv;
+
+jo := rename j(dni, n) (group_by dniemp dniemp, count(códigopr) true (select códigopr = código (distribución product prEv)));
+ju := rename j(m, dni, n)((project max(n) (jo)) product jo);
+vista8 := project dni(select n = m (ju)) difference dniEv;
+
+es_jefe(jefe, emp):= project jefe, dniemp(rename p(códigopr, d, jefe)(proyectos) njoin distribución);
+jefe(jefe, emp) := project jefe, emp (es_jefe) union project j2, e1 (rename j1(j1,e1) (es_jefe) zjoin j1=e2 rename j2(j2,e2) (jefe));
+vista9(dni) := project emp(select emp!= dni and jefe=dni (jefe product dniEv));

@@ -1,0 +1,32 @@
+v1(tipo, tiempo) := group_by tipo tipo, max(tiempo) true (select nombre = juego and nivel = 1 and superado = 'S' (partidas product juegos));
+
+z(nombre, jugadores) := group_by juego juego, count(juego) true(project juego, nick(select nivel = niveles and nombre = juego and superado = 'S'(juegos product partidas)));
+x(nombre, jugadores) := project nombre, 0 (juegos);
+v2(nombre, jugadores) := group_by nombre nombre, sum(jugadores) true(x union z);
+
+media(t, p) := group_by tipo tipo, avg(niveles) true (juegos);
+v3(juego, niveles, promedio) := project nombre, niveles, p(select t = tipo (media product juegos));
+
+maximo(j, ma) := group_by juego juego, max(edad) true (jugadores njoin partidas);
+v4 := project nick, edad, ciudad(select j = 'Tetris' and edad = ma (maximo product jugadores));
+
+n(nick, nombre, n) := group_by nick, juego nick, juego, count(nivel) true (distinct( project juego, nick, nivel(select superado = 'S' (partidas))));
+m(nick, nombre, m) := group_by nick, juego nick, juego, max(nivel) true (partidas);
+v5:= project nick, nombre(select m>n (n njoin m));
+
+v6:= project juego, nick(partidas) division distinct (project juego (select nick = 'Basra' (partidas)));
+
+nat(n) := project 1 (dual) union project n+1 (nat);
+nat(n, m) := select n<m((project 1 (dual) union project n+1 (nat)) product y);
+h(n, uno) := project nombre, 1 (juegos);
+x(uno, n) := group_by uno uno, count(uno) true (h);
+y(m) := project n (x);
+
+
+select true(v1);
+select true(v2);
+select true(v3);
+select true(v4);
+select true(v5);
+select true(v6);
+select true(v7);

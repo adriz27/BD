@@ -1,0 +1,36 @@
+PRÁCTICA 6: BLOQUEOS Y TRANSACCIONES                      Adrián Perez Peinador
+
+--------------------------------------1----------------------------------------
+En una primera consulta el saldo era de 400, pero después de hacer el commit se
+actualiza a 500.
+--------------------------------------2----------------------------------------
+1. La salida del Script indica 1 fila actualizada
+2. No actualiza la fila, se queda 'cargando', a la espera de que la transacción 
+de T1 acabe.
+3. T2 acaba con la actualizacion de la fila.
+4. En T1 el saldo es de 600, es decir se ha aplicado su incremento pero no se ve reflejado el de T2.
+6. Ahora T1 actualiza a 800 el saldo, es decir, se hace efectivo el incremento hecho en T2.
+--------------------------------------3----------------------------------------
+1, 2. Sin problema, indican 1 fila actualizada y cada uno refleja unicamente su cambio.
+3. Como antes, se queda a la espera de la finalización de la transacción de T2.
+4. T2 se queda a la espera, sin embargo T1 indica lo siguente 
+Informe de error -
+ORA-00060: detectado interbloqueo mientras se esperaba un recurso
+
+Comprometiendo en T1 y T2 se aplican todos los aumentos salvo el de T1 de 300, que había dado error.	
+--------------------------------------4----------------------------------------
+1. Se altera sin problema
+2. Indica que la suma de los saldos es 1800 (1300 + 500)
+3. Actualiza ambas cuentas
+4. Sigue indicando que la suma es 1800, es decir, no aplica los cambios realizados en 3. por ser 'serializable'.
+6. Ahora sí, al ser 'Read commited', indica que la suma es 2000
+8. Indica que la suma es 2200 teniendo en cuenta la actualización hecha en T2. Se aprecia la difrencia entre los niveles de aislamiento.
+--------------------------------------5----------------------------------------
+1, 2. Sin problemas
+3. La salida de Script informa de que se intenta reservar y después de que se ha reservado la localidad.
+4. No se puede porque ya está reservada.
+5. Se indica correctamente que no existe la localidad y no se puede.
+6. Esta instancia indica que la localidad se ha reservado.
+7. Indica que se ha reservado.
+8. Se crea una nueva reserva de la misma butaca con id nuevo. Obviamente es un problema porque hay dos personas con la misma butaca reservada.
+9. Se resuelve cambiando el nivel de aislamiento a serializable para que no deje hacer la segunda reserva.

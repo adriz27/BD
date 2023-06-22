@@ -1,0 +1,37 @@
+/abolish
+/type_casting on
+
+create table patrones(id_patron string primary key, nombre string, titulo string, edad integer);
+insert into patrones(id_patron, nombre, titulo, edad) values('1','Jacinto','CY',45);
+insert into patrones(id_patron, nombre, titulo, edad) values('2','Herminia','PY',35);
+insert into patrones(id_patron, nombre, titulo, edad) values('3','Calixto','PER',22);
+insert into patrones(id_patron, nombre, titulo, edad) values('4','Teodora','PER',29);
+insert into patrones(id_patron, nombre, titulo, edad) values('5','Vicente','PNB',29);
+
+create table barcos(id_barco string primary key, nombre_barco string, color string);
+insert into barcos(id_barco, nombre_barco, color) values('1','Albatros','blanco');
+insert into barcos(id_barco, nombre_barco, color) values('2','Bravo','blanco');
+insert into barcos(id_barco, nombre_barco, color) values('3','Coral','rojo');
+insert into barcos(id_barco, nombre_barco, color) values('4','Dorada','blanco');
+insert into barcos(id_barco, nombre_barco, color) values('5','Exodus','azul');
+
+create table reservas(id_patron string references patrones, id_barco string references barcos, fecha date, primary key (id_patron, id_barco, fecha));
+insert into reservas(id_patron, id_barco, fecha) values('1','1','2014-06-01');
+insert into reservas(id_patron, id_barco, fecha) values('1','2','2014-06-07');
+insert into reservas(id_patron, id_barco, fecha) values('1','4','2014-08-12');
+insert into reservas(id_patron, id_barco, fecha) values('2','4','2014-07-20');
+insert into reservas(id_patron, id_barco, fecha) values('3','1','2014-08-05');
+insert into reservas(id_patron, id_barco, fecha) values('3','3','2014-09-16');
+insert into reservas(id_patron, id_barco, fecha) values('3','1','2014-06-11');
+insert into reservas(id_patron, id_barco, fecha) values('3','5','2014-07-13');
+insert into reservas(id_patron, id_barco, fecha) values('4','4','2014-08-22');
+insert into reservas(id_patron, id_barco, fecha) values('4','5','2014-09-03');
+
+--Renombramos fecha para hacer el producto cartesiano con ella misma
+f1 := rename f1(fecha1) (project fecha (reservas));
+--Al quedarnos con los que fecha1>fecha en fecha1 quedan todas las fechas menos la mas antigua
+f := f1 difference (project fecha1 (select fecha1 > fecha (f1 product (project fecha (reservas)))));
+--Con la fecha más antigua sacamos el id de los patrones que hicieron reserva en ella
+id := rename pat(dni) (project id_patron (select fecha1 = fecha (f product reservas)));
+--Con el id es inmediato sacar los nombres
+vista1 := project nombre (select dni = id_patron (id product patrones));
